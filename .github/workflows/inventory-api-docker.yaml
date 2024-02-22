@@ -1,5 +1,5 @@
 name: API Dockerization
-run-name: It is a Dockerization workflow for ${{env.REPOSITORY_NAME}} EKS/ECS Project 🚀
+run-name: It is a Dockerization workflow for EKS/ECS Project 🚀
 on:
   push:
     branches:
