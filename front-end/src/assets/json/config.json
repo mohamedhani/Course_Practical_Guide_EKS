@@ -1,10 +1,10 @@
 {
     "config": {
         "api": {
-            "resourceApi": "https://api.mariomerco.com/resources-api",
-            "inventoryApi": "https://api.mariomerco.com/inventory-api",
-            "clientApi": "https://api.mariomerco.com/clients-api",
-            "rentingApi": "https://api.mariomerco.com/renting-api"
+            "resourceApi": "https://frontend.home.titanium-me.info/resources-api",
+            "inventoryApi": "https://frontend.home.titanium-me.info/inventory-api",
+            "clientApi": "https://frontend.home.titanium-me.info/clients-api",
+            "rentingApi": "https://frontend.home.titanium-me.info/renting-api"
         }
     }
 }
