@@ -8,7 +8,6 @@
 - update to Angular 
 ## [v1.3.0] 2017-08-28
 ### skipped for sync with Angular 4 version convention
-
 ## [v1.2.0] 2017-08-28
 ### skipped for sync with Angular 4 version convention
 
