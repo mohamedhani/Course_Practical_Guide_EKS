@@ -1,23 +1,23 @@
-name: Inventory API Dockerization
-run-name: It is a Dockerization workflow for Inventory API
+name: Resource API Dockerization
+run-name: It is a Dockerization workflow for Resource API
 on:
   push:
     branches:
     - 'master'
     - 'feature/**'
     paths:
-    - 'inventory-api/**'
+    - 'resource-api/**'
   pull_request:
     branches:    
     - master
     paths:
-    - 'inventory-api/**'
-    - '!inventory-api/ecs-defination.json'
+    - 'resource-api/**'
+    - '!resource-api/ecs-defination.json'
 permissions:
   contents: read    # This is required for actions/checkout
 env:
   AWS_REGION: us-east-1
-  REPOSITORY_NAME: inventory-api
+  REPOSITORY_NAME: resource-api
 jobs:
   env-tag:
     name: Get Docker Image Tag
