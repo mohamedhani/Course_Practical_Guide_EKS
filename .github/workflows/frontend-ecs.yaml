@@ -1,0 +1,55 @@
+name: frontend-ecs-deploy
+run-name: It is  ECS Deployment WorkFlow🚀
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service Name'
+        required: true
+        default: 'front-end'
+        type: choice
+        options:
+        - front-end
+      image-tag:
+        description: 'docker image tag'
+        required: true
+        type: string
+      cluster-name:
+        description: 'ECS Cluster Name'
+        required: true
+        type: string
+        default: 'project-cluster'
+
+permissions:
+  contents: read    # This is required for actions/checkout
+  id-token: write 
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 464498973176.dkr.ecr.us-east-1.amazonaws.com
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v1.7.0
+      with:
+        role-to-assume: arn:aws:iam::464498973176:role/github-action-sysadmin
+        role-session-name: GitHub_to_AWS_via_FederatedOIDC
+        aws-region: ${{ env.AWS_REGION }}
+    - name: Create Task Defination
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ./${{ inputs.service }}/ecs-defination.json
+        container-name: ${{ inputs.service }}
+        image: ${{ env.ECR_REGISTRY }}/${{ inputs.service }}:${{ inputs.image-tag }}
+
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: ${{ inputs.service }}-service 
+        cluster: ${{ inputs.cluster-name }}
+        wait-for-service-stability: true

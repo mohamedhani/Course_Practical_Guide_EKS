@@ -1,15 +1,13 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:us-east-1:464498973176:task-definition/frontend-task:2",
+    "taskDefinitionArn": "arn:aws:ecs:us-east-1:464498973176:task-definition/front-end-task:1",
     "containerDefinitions": [
         {
-            "name": "frontend",
-            "image": "464498973176.dkr.ecr.us-east-1.amazonaws.com/front-end:0242d11fe",
-            "cpu": 256,
-            "memory": 512,
-            "memoryReservation": 256,
+            "name": "front-end",
+            "image": "464498973176.dkr.ecr.us-east-1.amazonaws.com/front-end:c33faa557",
+            "cpu": 0,
             "portMappings": [
                 {
-                    "name": "frontend",
+                    "name": "http",
                     "containerPort": 80,
                     "hostPort": 80,
                     "protocol": "tcp",
@@ -26,7 +24,7 @@
                 "logDriver": "awslogs",
                 "options": {
                     "awslogs-create-group": "true",
-                    "awslogs-group": "/var/log/nginx/",
+                    "awslogs-group": "/var/log/nginx",
                     "awslogs-region": "us-east-1",
                     "awslogs-stream-prefix": "ecs"
                 },
@@ -38,17 +36,17 @@
                     "curl -f http://localhost/ || exit 1"
                 ],
                 "interval": 5,
-                "timeout": 5,
+                "timeout": 10,
                 "retries": 3,
                 "startPeriod": 10
             }
         }
     ],
-    "family": "frontend-task",
+    "family": "front-end-task",
     "taskRoleArn": "arn:aws:iam::464498973176:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::464498973176:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "revision": 2,
+    "revision": 1,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -63,9 +61,6 @@
         },
         {
             "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
-        },
-        {
-            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.21"
         },
         {
             "name": "com.amazonaws.ecs.capability.task-iam-role"
@@ -100,7 +95,7 @@
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
     },
-    "registeredAt": "2024-02-22T00:51:42.220Z",
+    "registeredAt": "2024-02-22T21:32:44.171Z",
     "registeredBy": "arn:aws:iam::464498973176:root",
     "tags": []
 }

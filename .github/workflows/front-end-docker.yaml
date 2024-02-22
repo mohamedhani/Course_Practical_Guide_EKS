@@ -12,6 +12,7 @@ on:
     - master
     paths:
     - 'front-end/**'
+    - '!front-end/ecs-defination.json'
 permissions:
   contents: read    # This is required for actions/checkout
 env:
