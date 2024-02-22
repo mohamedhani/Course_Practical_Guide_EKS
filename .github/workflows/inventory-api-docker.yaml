@@ -1,0 +1,123 @@
+name: API Dockerization
+run-name: It is a Dockerization workflow for ${{env.REPOSITORY_NAME}} EKS/ECS Project 🚀
+on:
+  push:
+    branches:
+    - 'master'
+    - 'feature/**'
+    paths:
+    - 'inventory-api/**'
+  pull_request:
+    branches:    
+    - master
+    paths:
+    - 'inventory-api**'
+    - '!inventory-api/ecs-defination.json'
+permissions:
+  contents: read    # This is required for actions/checkout
+env:
+  AWS_REGION: us-east-1
+  REPOSITORY_NAME: inventory-api
+jobs:
+  env-tag:
+    name: Get Docker Image Tag
+    runs-on: ubuntu-latest  
+    outputs:
+      imageTag: ${{ steps.env-tag.outputs.tag }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set env Tag
+      id: env-tag
+      run: |
+        TAG=`git log -1 --pretty=format:%H | cut -c -9`
+        echo "tag=$TAG"  >> $GITHUB_OUTPUT
+  build-only:
+    if:  startsWith(github.ref , 'refs/heads/feature/')
+    needs:
+    - env-tag
+    permissions:
+      id-token: write 
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v1.7.0
+      with:
+        role-to-assume: arn:aws:iam::464498973176:role/github-action-sysadmin
+        role-session-name: GitHub_to_AWS_via_FederatedOIDC
+        aws-region: ${{ env.AWS_REGION }}
+    - name: Login ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+    - name: Build Only
+      uses: docker/build-push-action@v5
+      with:
+        context: ./${{ env.REPOSITORY_NAME }}/src
+        file: ./${{ env.REPOSITORY_NAME }}/src/Dockerfile
+        push: false
+        tags: ${{ steps.login-ecr.outputs.registry }}/${{env.REPOSITORY_NAME}}:${{ needs.env-tag.outputs.imageTag }}
+    - name: Run Trivy vulnerability scanner
+      uses:  aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
+      with:
+        image-ref: ${{ steps.login-ecr.outputs.registry }}/${{env.REPOSITORY_NAME}}:${{ needs.env-tag.outputs.imageTag }}
+        format: 'sarif'
+       # exit-code: '1'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
+        output: 'trivy-results.sarif'
+        
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  build-and-push:
+    if: github.event_name == 'push' &&  github.ref =='refs/heads/master'
+    needs:
+    - env-tag
+    permissions:
+      id-token: write 
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v1.7.0
+      with:
+        role-to-assume: arn:aws:iam::464498973176:role/github-action-sysadmin
+        role-session-name: GitHub_to_AWS_via_FederatedOIDC
+        aws-region: ${{ env.AWS_REGION }}
+    - name: Login ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+    - name: Build Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./${{ env.REPOSITORY_NAME }}/src
+        file: ./${{ env.REPOSITORY_NAME }}/src/Dockerfile
+        push: false
+        tags: ${{ steps.login-ecr.outputs.registry }}/${{env.REPOSITORY_NAME}}:${{ needs.env-tag.outputs.imageTag }}
+    - name: Run Trivy vulnerability scanner
+      uses:  aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
+      with:
+        image-ref: ${{ steps.login-ecr.outputs.registry }}/${{env.REPOSITORY_NAME}}:${{ needs.env-tag.outputs.imageTag }}
+        format: 'sarif'
+       # exit-code: '1'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
+        output: 'trivy-results.sarif'     
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+    - name: Push Docker Image
+      run: | 
+        docker push ${{ steps.login-ecr.outputs.registry }}/${{env.REPOSITORY_NAME}}:${{ needs.env-tag.outputs.imageTag }}
