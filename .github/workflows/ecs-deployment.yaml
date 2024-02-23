@@ -1,4 +1,4 @@
-name: frontend-ecs-deploy
+name: ecs-deployment
 run-name: It is ECS ${{ inputs.service }} Deployment WorkFlow🚀
 on:
   workflow_dispatch:
