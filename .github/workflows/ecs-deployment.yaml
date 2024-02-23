@@ -10,6 +10,7 @@ on:
         type: choice
         options:
         - front-end
+        - resource-api
       image-tag:
         description: 'docker image tag'
         required: true
@@ -18,7 +19,7 @@ on:
         description: 'ECS Cluster Name'
         required: true
         type: string
-        default: 'project-cluster'
+        default: 'development-cluster'
 
 permissions:
   contents: read    # This is required for actions/checkout
