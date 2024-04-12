@@ -106,6 +106,10 @@ def dynamodb_list():
     }
     return { 'data': response }, 200
 
+@app.route("/healthz", methods=['GET'])
+def health_chech():
+    return { 'message': 'healthy' }, 200
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')

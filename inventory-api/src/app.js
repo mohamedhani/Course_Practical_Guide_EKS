@@ -190,6 +190,9 @@ async function iterateResponsePromise(listOfResources, response) {
         response.json(results)
     })
 }
+app.get('/healthz', function(request, response) {
+    response.json({ "message": "healthy" })
+})
 
 app.listen(port, () => {
     console.log('Inventory API Running...');
